@@ -1,0 +1,41 @@
+agent:
+  name: replace-with-agent-name
+  version: 0.1.0
+
+risk:
+  classification: medium
+  rationale: "Document the impact and autonomy."
+
+permissions:
+  shell_access: false
+  filesystem_allowed_paths: []
+  network_allowed_destinations: []
+  tools: []
+
+human_oversight:
+  required_for:
+    - external_publication
+    - sending_messages
+    - deleting_data
+    - modifying_external_systems
+
+data:
+  classification: internal
+  retention_policy: required
+  sensitive_data_logging: false
+
+reliability:
+  idempotency_required: true
+  bounded_retries: true
+  recovery_required: true
+  audit_logging: true
+
+security:
+  validate_external_inputs: true
+  validate_model_outputs: true
+  prompt_injection_testing: true
+
+release:
+  automated_checks_required: true
+  local_ai_review_required: true
+  owner_decision_required: true
