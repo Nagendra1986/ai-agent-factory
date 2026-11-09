@@ -123,9 +123,9 @@ release:
   owner_decision_required: true
 ```
 
-## LinkedIn Response Agent example
+## Illustrative future workload: LinkedIn Response Agent
 
-The first agent drafts responses. It should not scrape LinkedIn, automate browser interactions, or publish comments. The user supplies post text and URL, reviews the draft, and publishes manually. Store private knowledge and response history locally, never in a public repository.
+If this candidate is selected after platform acceptance, the agent would draft responses. This use case is illustrative and is not part of platform prerequisites. It should not scrape LinkedIn, automate browser interactions, or publish comments. The user supplies post text and URL, reviews the draft, and publishes manually. Store private knowledge and response history locally, never in a public repository.
 
 ## Governance references
 

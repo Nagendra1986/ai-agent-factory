@@ -1,71 +1,78 @@
 # 01 — Reference Architecture
 
-## Logical layers
+## Architecture principle
+
+The factory platform is a reusable developer capability. Agent applications are workloads built on top of it. Keep the platform operational and useful without any agent deployed.
+
+## Logical view
 
 ```text
-Human / Developer
-    |
-    +-- Open WebUI: chat, design discussion, prompt experiments
-    |
-    +-- VS Code + Roo Code: inspect/edit files, run tests with permission
-              |
-              v
-        Agent Factory workspace
-              |
-    +---------+---------------------------+
-    | Shared standards and templates      |
-    | Agent-specific source and tests     |
-    | Local-only data/configuration       |
-    +---------+---------------------------+
-              |
-       Ollama local API
-              |
-       Local LLM models
-              |
-    Agent runtime (per project)
-              |
-    SQLite / optional vector store / APIs
+                    PLATFORM FOUNDATION
+Human / Developer ------------------------------------+
+   |                                                   |
+   +-- Open WebUI: chat, requirements, prompt tests    |
+   +-- VS Code + Cline: project-scoped implementation  |
+   +-- Git/GitHub: source, PRs, CI                     |
+   +-- Quality/security tools: deterministic checks    |
+                         |                             |
+                  Agent Factory repository             |
+                  - standards and templates             |
+                  - shared, reviewed utilities          |
+                  - infrastructure definitions         |
+                         |                             |
+                  Ollama local API                      |
+                         |                             |
+                  Local model inventory                 |
+                                                       |
+                    AGENT WORKLOADS (LATER)             |
+          +----------------+  +----------------+        |
+          | Agent A        |  | Agent B        |  ...   |
+          | own code       |  | own code       |        |
+          | own deps       |  | own deps       |        |
+          | own data       |  | own data       |        |
+          | own governance |  | own governance|        |
+          +----------------+  +----------------+        |
 ```
 
-## Separation of responsibilities
+## Platform responsibilities
 
-### Chat workspace
+### Conversational workspace
 
-Open WebUI is for conversations, exploring ideas, drafting system prompts, and testing model behaviour. It is not automatically authorised to modify the Mac's files.
+Open WebUI supports design discussions, requirements analysis, prompt experiments, and model evaluation. It is not automatically authorised to modify project files. Its conversations and uploaded private materials are runtime data and must remain local/private.
 
 ### Coding workspace
 
-Roo Code in VS Code is the implementation assistant. It should operate in the active project workspace, use approval controls for terminal and file operations, and follow the repository's `AGENTS.md` and project rules.
+VS Code with the official Cline extension supports repository inspection, planning, implementation, tests, and tool use. Restrict the workspace to the active repository. Keep approval controls enabled for file edits and terminal commands. The coding assistant is a developer tool, not a production agent runtime.
 
 ### Model runtime
 
-Ollama serves local models through its local API. Model choice should be evaluated against the task, memory use, latency, structured-output support, and tool-calling needs.
+Ollama serves local models through its local API. Evaluate model quality, context size, tool-calling support, latency, and memory use. Confirm that the selected provider is the local Ollama endpoint before submitting private source or prompts.
 
-### Agent runtime
+### Engineering control plane
 
-Each agent is an independent application with its own dependencies, configuration, tests, logs, and data location. Agents may use shared libraries from the factory, but must not share mutable databases or secrets by default.
+Git/GitHub, CI, scanners, tests, templates, and governance rules provide repeatable engineering controls. GitHub-hosted CI runs deterministic checks; local AI review remains on the Mac unless a separately secured design is approved.
 
-## Suggested model roles
+## Agent workload responsibilities (added later)
 
-Initial experiments:
-- Llama 3.1 8B: general chat, requirements analysis, response drafting, and review.
-- Qwen3 8B: coding assistance and a second review perspective.
+Each agent owns its business logic, dependencies, configuration, data stores, prompts, integrations, access permissions, audit records, tests, and operational lifecycle. Agent workloads may consume approved platform services and shared libraries but must not couple the factory to one use case.
 
-These are candidate models, not fixed requirements. Compare them on representative tasks before standardising. Run models sequentially on a 24 GB machine if memory pressure occurs.
+## Suggested model candidates
 
-## Optional components
+Llama and Qwen family models may be evaluated for general chat, coding, and review. Model tags and context windows change; select based on actual benchmark results on the M5/24 GB machine. Do not treat a suggested model as a fixed platform dependency.
 
-- FastAPI: use when an agent needs an API or service boundary.
-- Streamlit: use for a lightweight local UI.
-- LangGraph: use when workflows need explicit state, branching, checkpoints, or human approval.
-- SQLite: use for structured local state and audit records.
-- ChromaDB: use only when semantic retrieval is needed and simple file/SQLite retrieval is insufficient.
-- Docker: use for services that benefit from container isolation, such as Open WebUI.
+## Optional agent-level components
 
-## Local network and security
+- FastAPI for an API boundary.
+- Streamlit for a lightweight local UI.
+- LangGraph for explicit state, branching, checkpoints, or human approval.
+- SQLite for structured per-agent state.
+- ChromaDB or another vector store only when semantic retrieval is required.
+- External APIs/connectors only after a documented need, privacy review, and approval model.
 
-- Bind local dashboards to `127.0.0.1` unless remote access is deliberately designed and secured.
+## Local network and runtime-data security
+
+- Bind local dashboards to `127.0.0.1` unless remote access is explicitly designed and secured.
 - Do not expose Ollama's API to the internet.
-- Use named Docker volumes for persistent service data.
-- Keep secrets out of source control.
-- Do not run untrusted PR code on a self-hosted Mac runner.
+- Use Docker named volumes or explicit host paths for persistent service data; document the exact location and backup method.
+- Keep `.env`, databases, logs, chat history, private knowledge, and generated user content out of Git.
+- A local model provider does not by itself guarantee that an extension or plugin makes no network requests. Review telemetry, MCP servers, browser tools, and integrations separately.

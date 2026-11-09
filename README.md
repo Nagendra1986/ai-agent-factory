@@ -1,69 +1,81 @@
 # Local AI Agent Factory
 
-A local-first development environment for designing, building, testing, reviewing, and maintaining multiple AI agents on an Apple Silicon Mac.
+A reusable, local-first platform for designing, building, testing, reviewing, operating, and maintaining multiple AI agents on an Apple Silicon Mac.
 
-## Goals
+## The central design decision: platform first, agents later
 
-- Use local LLM inference by default through Ollama.
-- Provide a conversational workspace for discussing agent designs.
-- Use an AI coding assistant to implement projects in VS Code.
-- Reuse shared standards, templates, and utilities across agents.
-- Make idempotency, governance, security, testing, and documentation mandatory.
-- Publish only sanitised, intentionally public source code to GitHub.
-- Use pull requests and automated checks without requiring a second human approver.
+This repository describes **two separate workstreams**:
 
-## Platform at a glance
+1. **Build and validate the Agent Factory platform** as a reusable prerequisite. This includes the local model runtime, chat and coding workspaces, development toolchain, shared standards, security controls, verification pipeline, GitHub workflow, and operational practices.
+2. **Build individual agents on top of the validated platform**, only when a use case is selected. Each agent gets its own requirements, governance, dependencies, runtime data, tests, and deployment lifecycle.
 
-| Capability | Proposed component |
-|---|---|
-| Local model runtime | Ollama |
-| General chat interface | Open WebUI |
-| Coding assistant | VS Code + Roo Code |
-| Primary local models | Llama 3.1 8B and Qwen3 8B (evaluate on device) |
-| Python environment management | uv |
-| Agent APIs | FastAPI when needed |
-| Lightweight UI | Streamlit when needed |
-| Stateful orchestration | LangGraph when justified |
-| Structured persistence | SQLite |
-| Retrieval | ChromaDB or another local vector store when justified |
-| Quality and security | Ruff, Bandit, Gitleaks, pip-audit, Trivy |
-| Tests | pytest |
-| Source control and PRs | GitHub |
-| CI | GitHub Actions |
+The platform must be useful even if no agent is built yet. No agent-specific assumptions, data, integrations, or credentials belong in the platform foundation. The LinkedIn Response Agent is a possible first consumer of the factory, not the purpose of the factory and not a prerequisite for installing it.
 
-The components are defaults, not mandatory dependencies for every agent. Prefer the smallest architecture that satisfies the use case.
+## Platform capabilities and proposed components
+
+| Capability | Proposed component | Platform or agent layer? |
+|---|---|---|
+| Local model runtime | Ollama | Platform |
+| General chat/design workspace | Open WebUI | Platform |
+| Coding workspace | VS Code + official Cline extension | Platform/developer tool |
+| Local model candidates | Llama/Qwen family; benchmark before standardising | Platform |
+| Python/toolchain management | uv | Platform |
+| Source control and collaboration | Git + GitHub | Platform |
+| Deterministic quality/security checks | Ruff, pytest, Bandit, Gitleaks, pip-audit, Trivy | Platform standards; applied per project |
+| Agent API | FastAPI, only if needed | Agent-specific optional |
+| Agent UI | Streamlit, only if needed | Agent-specific optional |
+| Stateful orchestration | LangGraph, only if justified | Agent-specific optional |
+| Structured state | SQLite, per agent | Agent-specific optional |
+| Retrieval/vector store | ChromaDB or alternative, only if needed | Agent-specific optional |
+| Containers | Docker Compose for selected local services | Platform/agent-specific |
+
+These are defaults, not a requirement to install every framework or use every component in every agent. Prefer the smallest architecture that meets the validated use case.
 
 ## Repository layout
 
 ```text
 ai-agent-factory/
 ├── README.md
-├── docs/
-├── standards/
-├── templates/
-│   └── agent-template/
-├── shared/
-│   └── utilities/
-├── infrastructure/
-│   ├── docker/
-│   └── scripts/
-├── .github/
-│   └── workflows/
+├── docs/                 # platform and agent lifecycle documentation
+├── standards/            # reusable security, quality, and governance standards
+├── templates/            # starting point for future agent projects
+├── shared/               # reviewed, reusable code only
+├── infrastructure/       # platform service definitions and setup scripts
+├── .github/workflows/    # deterministic CI checks
 └── .gitignore
+
+# Keep private/local runtime state outside this repository:
+~/AI-Lab-local/
+├── data/                 # databases, vector stores, user content
+├── knowledge/            # private knowledge bases and source documents
+├── secrets/              # local credentials/configuration
+├── logs/                 # local logs
+├── backups/              # encrypted local backups
+└── models/               # optional model artifacts not managed by Ollama
 ```
 
-Keep each agent's private runtime data outside the public repository. An agent may have its own repository if its source code is suitable for public release.
+The exact local directory can be adjusted, but runtime state must not be stored in a public Git repository. Docker named volumes and Ollama's model storage are also local runtime state.
 
-## Start here
+## Read and implement in this order
 
-1. Read `docs/00-decisions-and-scope.md`.
-2. Follow `docs/02-mac-local-environment.md`.
-3. Configure the chat and coding interfaces using `docs/03-ai-workspaces.md`.
-4. Read `docs/04-agent-development-lifecycle.md`.
-5. Apply `docs/05-governance-and-risk.md` and `docs/06-security-and-code-review.md` to every agent.
-6. Use `docs/07-github-and-pull-requests.md` for source control and CI.
-7. Copy `templates/agent-template/` when starting a new agent.
+### Workstream A — build the reusable platform
 
-## Status
+1. `docs/00-decisions-and-scope.md` — principles and boundaries.
+2. `docs/01-reference-architecture.md` — platform layers and agent boundary.
+3. `docs/02-mac-local-environment.md` — one-time platform setup.
+4. `docs/03-ai-workspaces.md` — Open WebUI, VS Code, Cline, and local model workflow.
+5. `docs/05-governance-and-risk.md` and `docs/06-security-and-code-review.md` — platform-wide guardrails.
+6. `docs/07-github-and-pull-requests.md` — public repository and CI controls.
+7. `docs/08-operations-and-maintenance.md` — backup, upgrades, and operations.
+8. `docs/platform-acceptance-checklist.md` — prove the platform works before building an agent.
 
-This repository is the documented target design. Installation and validation are not complete until each step has been executed on the Mac and its checks have passed. Do not treat documentation as proof that a component is installed or working.
+### Workstream B — build agents only after platform acceptance
+
+1. Use `docs/04-agent-development-lifecycle.md`.
+2. Copy `templates/agent-template/` for each new agent.
+3. Complete its own requirements, data-flow, threat model, governance manifest, tests, and acceptance criteria.
+4. Keep agent runtime data and private knowledge local and separate from the public source repository.
+
+## Status and evidence
+
+This repository is a documented target design and working checklist, not proof that all components are installed. Mark a component or phase complete only after the stated verification has been executed and its evidence recorded. Record versions and actual command results; do not infer success from a file existing.

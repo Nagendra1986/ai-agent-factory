@@ -31,6 +31,14 @@ agent-name/
         └── quality-security.yml
 ```
 
+## Runtime data boundary
+
+Keep runtime data outside the source repository by default. Use a local path such as `~/AI-Lab-local/agents/<agent-name>/` for databases, vector stores, logs, uploaded content, generated outputs, and private knowledge. Store secrets in a local `.env` or approved secret store; commit only `.env.example` with placeholders. Do not rely on `.gitignore` as the only privacy control.
+
+## Runtime data boundary
+
+Keep runtime data outside the source repository by default. Use a local path such as `~/AI-Lab-local/agents/<agent-name>/` for databases, vector stores, logs, uploaded content, generated outputs, and private knowledge. Store secrets in a local `.env` or approved secret store; commit only `.env.example` with placeholders. Do not rely on `.gitignore` as the only privacy control.
+
 ## Project rules
 
 - Use a separate `uv` environment.

@@ -1,105 +1,43 @@
 # 04 — Standard Agent Development Lifecycle
 
-Every agent follows this lifecycle. Scale the process to the risk and complexity of the application.
+This lifecycle applies to **each future agent project** after the Agent Factory platform has passed its own acceptance checklist. Platform installation is not an agent-development stage, and no agent is assumed to be in scope by default.
 
-## Stage 1: Discover
+## Stage 0: platform readiness
 
-Document:
-- problem statement;
-- intended users;
-- business outcome;
-- trigger and operating context;
-- inputs and outputs;
-- non-goals;
-- external systems;
-- constraints and assumptions.
+Confirm that the factory platform acceptance criteria are met: local model inference, chat/coding workspaces, repository hygiene, tests/scanners, local AI review, GitHub PR/CI, and backup/recovery evidence. If the platform is not ready, return to the platform roadmap rather than embedding workarounds into an agent.
 
-Do not start coding while the purpose and boundaries remain ambiguous.
+## Stage 1: discover
 
-## Stage 2: Design
+Document the problem, users, expected outcome, trigger, operating context, inputs/outputs, non-goals, external systems, constraints, and assumptions. Do not code while purpose and boundaries remain ambiguous.
 
-Produce:
-- architecture diagram;
-- component responsibilities;
-- data-flow description;
-- model selection rationale;
-- tool and permission inventory;
-- data classification;
-- risk classification and threat model;
-- state machine and recovery design;
-- idempotency strategy;
-- acceptance criteria.
+## Stage 2: design
 
-Prefer a single-agent design unless multiple agents provide a clear benefit.
+Produce the architecture, component responsibilities, data flow, model rationale, tool/permission inventory, data classification, risk/threat model, state/recovery design, idempotency strategy, acceptance criteria, and operational plan. Prefer a single-agent design unless multiple agents provide a clear benefit.
 
-## Stage 3: Scaffold
+## Stage 3: scaffold
 
-Create an isolated project using the agent template:
-- own `pyproject.toml` and `uv.lock`;
-- own `.venv`;
-- own configuration;
-- own tests;
-- own documentation;
-- own runtime data location.
+Create an isolated project from `templates/agent-template/` with its own `pyproject.toml`, `uv.lock`, `.venv`, configuration, tests, documentation, governance manifest, and local runtime-data directory. Do not copy secrets, user data, or another agent's database.
 
-Do not copy secrets, user data, or another agent's database.
+## Stage 4: implement
 
-## Stage 4: Implement
+Use small, reviewable changes. Separate domain logic, model interaction, tools/integrations, persistence, UI/API, configuration, and observability. Validate external inputs and model-generated structured outputs. Treat model output and retrieved content as untrusted.
 
-Use small, reviewable changes. Separate:
-- domain/business logic;
-- model interaction;
-- tools and integrations;
-- persistence;
-- UI/API;
-- configuration;
-- observability.
+## Stage 5: verify
 
-Validate all external inputs and model-generated structured outputs. Treat model output as untrusted.
+Run relevant formatting/linting, unit/integration/idempotency tests, security scanners, dependency audits, prompt-injection/tool-abuse tests, and local AI review. Record actual outputs and unresolved findings.
 
-## Stage 5: Verify
+## Stage 6: pull request
 
-Run:
-- formatting and linting;
-- unit tests;
-- integration tests;
-- idempotency and retry tests;
-- security scanners;
-- dependency audit;
-- prompt-injection and tool-abuse tests where relevant;
-- AI code review.
+Create a feature branch, commit only intended files, scan staged changes and Git history for secrets, push, open a PR into `main`, run CI, attach/link local AI review evidence, and resolve or document findings.
 
-Record actual command output or machine-readable reports.
+## Stage 7: merge and release
 
-## Stage 6: Pull request
+The owner is the final decision-maker; no second human approver is required by this workflow. Merge only when mandatory checks pass and remaining risks are understood. Tag releases and maintain a changelog. Deploy in dry-run or restricted mode when the agent can create external side effects.
 
-- create a feature branch;
-- commit only intended files;
-- scan staged changes and Git history for secrets;
-- push to GitHub;
-- create a PR into `main`;
-- let CI run;
-- attach or link the local AI review report;
-- inspect findings and resolve or document exceptions.
+## Stage 8: operate and improve
 
-## Stage 7: Merge and release
-
-The owner is the final decision-maker. No second human approval is required by this workflow.
-
-Merge only when required checks pass and remaining findings are understood. Tag releases and maintain a changelog. For agents with external side effects, deploy first in a restricted or dry-run mode.
-
-## Stage 8: Operate and improve
-
-Define:
-- logs and audit records;
-- retention and backup;
-- health checks;
-- failure alerts;
-- model/version tracking;
-- rollback procedure;
-- dependency update process;
-- periodic security review.
+Define logs/audit records, retention, backup, health checks, failure alerts, model/version tracking, rollback, dependency updates, and periodic security review.
 
 ## Definition of done
 
-An agent is not done merely because it runs once. It must meet its acceptance criteria, have documented boundaries, pass applicable tests and scans, and have a recovery and maintenance approach.
+An agent is not done merely because it runs once. It must meet acceptance criteria, have documented boundaries, pass applicable tests/scans, and have a recovery and maintenance approach.
